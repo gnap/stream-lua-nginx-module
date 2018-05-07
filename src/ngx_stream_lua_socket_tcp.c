@@ -31,6 +31,7 @@ static int ngx_stream_lua_socket_tcp_setoption(lua_State *L);
 static int ngx_stream_lua_socket_tcp_settimeout(lua_State *L);
 static int ngx_stream_lua_socket_tcp_settimeouts(lua_State *L);
 static void ngx_stream_lua_socket_tcp_handler(ngx_event_t *ev);
+static int ngx_stream_lua_req_socket_tcp_prereadbuf(lua_State *L);
 static ngx_int_t ngx_stream_lua_socket_tcp_get_peer(ngx_peer_connection_t *pc,
     void *data);
 static void ngx_stream_lua_socket_init_peer_connection_addr_text(
@@ -246,7 +247,7 @@ ngx_stream_lua_inject_socket_tcp_api(ngx_log_t *log, lua_State *L)
 
     /* {{{raw req socket object metatable */
     lua_pushlightuserdata(L, &ngx_stream_lua_raw_req_socket_metatable_key);
-    lua_createtable(L, 0 /* narr */, 6 /* nrec */);
+    lua_createtable(L, 0 /* narr */, 7 /* nrec */);
 
     lua_pushcfunction(L, ngx_stream_lua_socket_tcp_receive);
     lua_setfield(L, -2, "receive");
@@ -265,6 +266,9 @@ ngx_stream_lua_inject_socket_tcp_api(ngx_log_t *log, lua_State *L)
 
     lua_pushcfunction(L, ngx_stream_lua_socket_tcp_shutdown);
     lua_setfield(L, -2, "shutdown");
+
+    lua_pushcfunction(L, ngx_stream_lua_req_socket_tcp_prereadbuf);
+    lua_setfield(L, -2, "prereadbuf");
 
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
@@ -2862,6 +2866,47 @@ ngx_stream_lua_socket_tcp_settimeouts(lua_State *L)
     return 0;
 }
 
+
+static int
+ngx_stream_lua_req_socket_tcp_prereadbuf(lua_State *L)
+{
+    ngx_stream_lua_request_t            *r;
+    size_t                               size = 0;
+    off_t                                preread = 0;
+    luaL_Buffer                          luabuf;
+
+
+    r = ngx_stream_lua_get_req(L);
+    if (r == NULL) {
+        return luaL_error(L, "no request found");
+    }
+
+    ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                   "stream lua tcp socket calling prereadbuf() method");
+
+    if (r->connection->buffer != NULL) {
+        preread = ngx_buf_size(r->connection->buffer);
+    }
+
+    if (preread) {
+
+        if ((off_t) size > preread) {
+            size = (size_t) preread;
+        }
+
+        ngx_stream_lua_probe_req_socket_peak_preread(r,
+                r->connection->buffer->pos,
+                size);
+
+        luaL_buffinit(L, &luabuf);
+        luaL_addlstring(&luabuf, (char *) r->connection->buffer->pos, size);
+        luaL_pushresult(&luabuf);
+    } else  {
+        lua_pushnil(L);
+    }
+
+    return 1;
+}
 
 static void
 ngx_stream_lua_socket_tcp_handler(ngx_event_t *ev)
