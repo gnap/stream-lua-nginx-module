@@ -2870,6 +2870,7 @@ ngx_stream_lua_socket_tcp_settimeouts(lua_State *L)
 static int
 ngx_stream_lua_req_socket_tcp_prereadbuf(lua_State *L)
 {
+
     ngx_stream_lua_request_t            *r;
     size_t                               size = 0;
     off_t                                preread = 0;
