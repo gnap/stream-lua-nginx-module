@@ -2871,8 +2871,7 @@ static int
 ngx_stream_lua_req_socket_tcp_prereadbuf(lua_State *L)
 {
     ngx_stream_lua_request_t            *r;
-    size_t                               size = 0;
-    off_t                                preread = 0;
+    size_t                               preread = 0;
     luaL_Buffer                          luabuf;
 
 
@@ -2885,21 +2884,17 @@ ngx_stream_lua_req_socket_tcp_prereadbuf(lua_State *L)
                    "stream lua tcp socket calling prereadbuf() method");
 
     if (r->connection->buffer != NULL) {
-        preread = ngx_buf_size(r->connection->buffer);
+        preread = (size_t) ngx_buf_size(r->connection->buffer);
     }
 
     if (preread) {
 
-        if ((off_t) size > preread) {
-            size = (size_t) preread;
-        }
-
         ngx_stream_lua_probe_req_socket_peak_preread(r,
                 r->connection->buffer->pos,
-                size);
+                preread);
 
         luaL_buffinit(L, &luabuf);
-        luaL_addlstring(&luabuf, (char *) r->connection->buffer->pos, size);
+        luaL_addlstring(&luabuf, (char *) r->connection->buffer->pos, preread);
         luaL_pushresult(&luabuf);
     } else  {
         lua_pushnil(L);
