@@ -26,8 +26,6 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
 {
     int                          n;
     ngx_int_t                    bytes;
-    size_t                       size = 0;
-    off_t                        preread = 0;
     ngx_stream_lua_request_t    *r;
     luaL_Buffer luabuf;
 
@@ -56,25 +54,6 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
         return luaL_error(L, "invalid preread bytes \"%d\"", bytes);
     }
 
-    // TODO: check bytes too large.
-
-    if (r->connection->buffer != NULL) {
-        preread = (size_t)ngx_buf_size(r->connection->buffer);
-    }
-
-    if (preread >= (size_t)bytes) {
-
-        // TODO define this probe.
-        ngx_stream_lua_probe_req_peak_preread(r,
-                r->connection->buffer->pos,
-                preread);
-
-        luaL_buffinit(L, &luabuf);
-        luaL_addlstring(&luabuf, (char *) r->connection->buffer->pos, preread);
-        luaL_pushresult(&luabuf);
-        return 1;
-    } 
-
     coctx = ctx->cur_co_ctx;
     if (coctx == NULL) {
         return luaL_error(L, "no co ctx found");
@@ -95,7 +74,6 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
 void
 ngx_stream_lua_inject_req_preread_api(lua_State *L)
 {
-    // TODO inject to ngx.req.preread()
     lua_pushcfunction(L, ngx_stream_lua_ngx_req_preread);
     lua_setfield(L, -2, "preread");
 }
@@ -138,12 +116,10 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
 
     if (preread >= (size_t)bytes) {
 
-        // TODO define this probe.
         ngx_stream_lua_probe_req_peak_preread(r,
                 r->connection->buffer->pos,
                 preread);
 
-        // TODO make prepare retvals right.
         luaL_buffinit(L, &luabuf);
         luaL_addlstring(&luabuf, (char *) r->connection->buffer->pos, preread);
         luaL_pushresult(&luabuf);
@@ -154,7 +130,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         vm = ngx_stream_lua_get_lua_vm(r, ctx);
         nreqs = c->requests;
 
-        rc = ngx_stream_lua_run_thread(vm, r, ctx, 0);
+        rc = ngx_stream_lua_run_thread(vm, r, ctx, 1);
 
         ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                        "lua run thread returned %d", rc);
