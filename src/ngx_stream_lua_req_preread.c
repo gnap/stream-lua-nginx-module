@@ -14,6 +14,7 @@
 #include "ngx_stream_lua_util.h"
 #include "ngx_stream_lua_req_preread.h"
 #include "ngx_stream_lua_contentby.h"
+#include "ngx_stream_lua_probe.h"
 
 
 static int ngx_stream_lua_ngx_req_preread(lua_State *L);
@@ -27,7 +28,6 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     int                          n;
     ngx_int_t                    bytes;
     ngx_stream_lua_request_t    *r;
-    luaL_Buffer luabuf;
 
     ngx_stream_lua_ctx_t                *ctx;
     ngx_stream_lua_co_ctx_t             *coctx;
@@ -65,7 +65,7 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
 
     ctx->resume_handler = ngx_stream_lua_req_preread_resume;
     r->read_event_handler = ngx_stream_lua_core_run_phases;
-    r->write_event_handler = ngx_stream_lua_request_empty_handler;
+    r->write_event_handler = ngx_stream_lua_wev_handler;
 
 
     return lua_yield(L, 0);
@@ -82,8 +82,7 @@ ngx_stream_lua_inject_req_preread_api(lua_State *L)
 static void
 ngx_stream_lua_req_preread_cleanup(void *data)
 {
-    ngx_stream_lua_co_ctx_t                *coctx = data;
-
+   // ngx_stream_lua_co_ctx_t                *coctx = data;
    // TODO don't know what to clean yet. 
 }
 
@@ -98,15 +97,15 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     ngx_uint_t                           nreqs;
     ngx_stream_lua_ctx_t                *ctx;
     ngx_int_t                            bytes;
-    size_t                               size = 0;
     off_t                                preread = 0;
+    luaL_Buffer luabuf;
 
     ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
     if (ctx == NULL) {
         return NGX_ERROR;
     }
 
-    L = ctx.cur_co_ctx.co;
+    L = ctx->cur_co_ctx->co;
 
     bytes = (ngx_int_t) luaL_checknumber(L, 1);
 
@@ -114,7 +113,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         preread = (size_t)ngx_buf_size(r->connection->buffer);
     }
 
-    if (preread >= (size_t)bytes) {
+    if (preread >= (off_t)bytes) {
 
         ngx_stream_lua_probe_req_peak_preread(r,
                 r->connection->buffer->pos,
