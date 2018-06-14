@@ -1834,7 +1834,7 @@ ngx_stream_lua_inject_req_api(ngx_log_t *log, lua_State *L)
     ngx_stream_lua_inject_req_socket_api(L);
     ngx_stream_lua_inject_req_preread_api(L);
 
-    lua_setfield(L, -3, "req");
+    lua_setfield(L, -2, "req");
 }
 
 
