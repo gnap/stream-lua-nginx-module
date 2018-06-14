@@ -31,6 +31,7 @@
 #include "ngx_stream_lua_socket_tcp.h"
 #include "ngx_stream_lua_socket_udp.h"
 #include "ngx_stream_lua_sleep.h"
+#include "ngx_stream_lua_req_preread.h"
 #include "ngx_stream_lua_phase.h"
 #include "ngx_stream_lua_probe.h"
 #include "ngx_stream_lua_uthread.h"
