@@ -65,7 +65,7 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
 
     ctx->resume_handler = ngx_stream_lua_req_preread_resume;
     r->read_event_handler = ngx_stream_lua_core_run_phases;
-    r->write_event_handler = ngx_stream_lua_wev_handler;
+    r->write_event_handler = ngx_stream_lua_core_run_phases;
 
 
     return lua_yield(L, 0);
