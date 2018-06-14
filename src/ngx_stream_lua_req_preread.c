@@ -73,7 +73,7 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     ngx_log_debug2(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "r->connection->read->active: %d ready: %d",
                    r->connection->read->active,
-                   r->conneciton->read->ready);
+                   r->connection->read->ready);
     ctx->resume_handler = ngx_stream_lua_req_preread_resume;
     r->read_event_handler = ngx_stream_lua_core_run_phases;
     r->write_event_handler = ngx_stream_lua_core_run_phases;
