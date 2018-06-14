@@ -66,10 +66,6 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     coctx->cleanup = ngx_stream_lua_req_preread_cleanup;
     coctx->data = r;
 
-    preread = (size_t)ngx_buf_size(r->connection->buffer);
-    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
-                   "preread buffer filed %d", preread);
-
     ngx_log_debug2(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "r->connection->read->active: %d ready: %d",
                    r->connection->read->active,
