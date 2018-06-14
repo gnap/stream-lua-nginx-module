@@ -32,12 +32,6 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     ngx_stream_lua_ctx_t                *ctx;
     ngx_stream_lua_co_ctx_t             *coctx;
 
-    ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
-    if (ctx == NULL) {
-        return luaL_error(L, "no request ctx found");
-    }
-
-    ngx_stream_lua_check_context(L, ctx, NGX_STREAM_LUA_CONTEXT_PREREAD);
     n = lua_gettop(L);
     if (n != 1) {
         return luaL_error(L, "attempt to pass %d arguments, but accepted 1", n);
@@ -47,6 +41,13 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     if (r == NULL) {
         return luaL_error(L, "no request found");
     }
+
+    ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
+    if (ctx == NULL) {
+        return luaL_error(L, "no request ctx found");
+    }
+
+    ngx_stream_lua_check_context(L, ctx, NGX_STREAM_LUA_CONTEXT_PREREAD);
 
     bytes = (ngx_int_t) luaL_checknumber(L, 1);
 
