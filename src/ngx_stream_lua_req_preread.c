@@ -65,9 +65,20 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     coctx->data = r;
 
     ctx->resume_handler = ngx_stream_lua_req_preread_resume;
-    r->read_event_handler = ngx_stream_lua_core_run_phases;
-    r->write_event_handler = ngx_stream_lua_core_run_phases;
+    r->read_event_handler = ngx_stream_lua_rd_check_broken_connection;
 
+    ev = r->connection->read;
+
+    dd("rev active: %d", ev->active);
+
+    if ((ngx_event_flags & NGX_USE_LEVEL_EVENT) && !ev->active) {
+        if (ngx_add_event(ev, NGX_READ_EVENT, 0) != NGX_OK) {
+            lua_pushnil(L);
+            lua_pushliteral(L, "failed to add event");
+            return 2;
+        }
+    }
+    r->write_event_handler = ngx_stream_lua_core_run_phases;
 
     return lua_yield(L, 0);
 }
