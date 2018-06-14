@@ -11,6 +11,7 @@
 #include "ddebug.h"
 
 
+#include "ngx_stream_lua_common.h"
 #include "ngx_stream_lua_util.h"
 #include "ngx_stream_lua_req_preread.h"
 #include "ngx_stream_lua_contentby.h"
@@ -28,7 +29,6 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     int                          n;
     ngx_int_t                    bytes;
     ngx_stream_lua_request_t    *r;
-    ngx_event_t                 *ev;
 
     ngx_stream_lua_ctx_t        *ctx;
     ngx_stream_lua_co_ctx_t     *coctx;
@@ -70,13 +70,12 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "preread buffer filed %d", preread);
 
-    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+    ngx_log_debug2(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "r->connection->read->active: %d ready: %d",
                    r->connection->read->active,
                    r->conneciton->read->ready);
-
     ctx->resume_handler = ngx_stream_lua_req_preread_resume;
-    r->read_event_handler = ngx_streawm_lua_core_run_phases;
+    r->read_event_handler = ngx_stream_lua_core_run_phases;
     r->write_event_handler = ngx_stream_lua_core_run_phases;
     return lua_yield(L, 0);
 }
