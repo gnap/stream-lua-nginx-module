@@ -215,6 +215,7 @@ preread buf = hello
 --- no_error_log
 [crit]
 [warn]
+--- timeout: 10
 
 
 === TEST 39: Lua file does not exist
