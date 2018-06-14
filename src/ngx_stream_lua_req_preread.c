@@ -32,6 +32,7 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
 
     ngx_stream_lua_ctx_t        *ctx;
     ngx_stream_lua_co_ctx_t     *coctx;
+    off_t                                preread = 0;
 
     n = lua_gettop(L);
     if (n != 1) {
@@ -65,22 +66,18 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     coctx->cleanup = ngx_stream_lua_req_preread_cleanup;
     coctx->data = r;
 
+    preread = (size_t)ngx_buf_size(r->connection->buffer);
+    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                   "preread buffer filed %d", preread);
+
+    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                   "r->connection->read->active: %d ready: %d",
+                   r->connection->read->active,
+                   r->conneciton->read->ready);
+
     ctx->resume_handler = ngx_stream_lua_req_preread_resume;
-    r->read_event_handler = ngx_stream_lua_rd_check_broken_connection;
-
-    ev = r->connection->read;
-
-    dd("rev active: %d", ev->active);
-
-    if ((ngx_event_flags & NGX_USE_LEVEL_EVENT) && !ev->active) {
-        if (ngx_add_event(ev, NGX_READ_EVENT, 0) != NGX_OK) {
-            lua_pushnil(L);
-            lua_pushliteral(L, "failed to add event");
-            return 2;
-        }
-    }
+    r->read_event_handler = ngx_streawm_lua_core_run_phases;
     r->write_event_handler = ngx_stream_lua_core_run_phases;
-
     return lua_yield(L, 0);
 }
 
@@ -125,6 +122,10 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     if (r->connection->buffer != NULL) {
         preread = (size_t)ngx_buf_size(r->connection->buffer);
     }
+
+    preread = (size_t)ngx_buf_size(r->connection->buffer);
+    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                   "preread buffer filed %d", preread);
 
     if (preread >= (off_t)bytes) {
 
