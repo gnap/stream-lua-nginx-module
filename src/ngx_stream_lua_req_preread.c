@@ -28,7 +28,7 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     int                          n;
     ngx_int_t                    bytes;
     ngx_stream_lua_request_t    *r;
-    ngx_event_t                 *rev;
+    ngx_event_t                 *ev;
 
     ngx_stream_lua_ctx_t        *ctx;
     ngx_stream_lua_co_ctx_t     *coctx;
