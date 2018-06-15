@@ -88,13 +88,13 @@ void
 ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 {
     ngx_connection_t                *c;
+    size_t                           size;
     ssize_t                          n;
-    ngx_int_t                        rc;
+    ngx_int_t                        rc = NGX_OK;
     ngx_stream_lua_ctx_t            *ctx;
-    ngx_stream_lua_co_ctx_t         *coctx;
     ngx_stream_core_srv_conf_t      *cscf;
 
-    cscf = ngx_stream_get_module_srv_conf(s, ngx_stream_core_module);
+    cscf = ngx_stream_lua_get_module_srv_conf(r, ngx_stream_core_module);
 
     c = r->connection;
 
@@ -142,7 +142,7 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
             c->read->handler = ngx_stream_session_handler;
 
             rc = NGX_AGAIN;
-            break
+            break;
         }
 
         n = c->recv(c, c->buffer->last, size);
