@@ -115,10 +115,6 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
         return luaL_error(L, "no co ctx found");
     }
 
-    L = coctx->co;
-
-    bytes = (ngx_int_t) luaL_checknumber(L, 1);
-
     do {
 
         if (c->buffer == NULL) {
@@ -172,6 +168,10 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
         }
 
     } while (n > 0);
+
+    L = coctx->co;
+
+    bytes = (ngx_int_t) luaL_checknumber(L, 1);
 
     preread = (size_t)ngx_buf_size(r->connection->buffer);
 
