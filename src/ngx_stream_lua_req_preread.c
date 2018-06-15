@@ -93,6 +93,7 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
     size_t                           size;
     ssize_t                          n;
     ngx_stream_lua_ctx_t            *ctx;
+    ngx_stream_lua_co_ctx_t         *coctx;
     ngx_stream_core_srv_conf_t      *cscf;
     ngx_int_t                        bytes;
     off_t                            preread = 0;
@@ -109,7 +110,12 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
         return;
     }
 
-    L = ctx->cur_co_ctx->co;
+    coctx = ctx->cur_co_ctx;
+    if (coctx == NULL) {
+        return luaL_error(L, "no co ctx found");
+    }
+
+    L = coctx->co;
 
     bytes = (ngx_int_t) luaL_checknumber(L, 1);
 
@@ -192,6 +198,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     ngx_int_t                            rc;
     ngx_uint_t                           nreqs;
     ngx_stream_lua_ctx_t                *ctx;
+    ngx_stream_lua_co_ctx_t             *coctx;
     ngx_int_t                            bytes;
     off_t                                preread = 0;
     luaL_Buffer luabuf;
@@ -204,7 +211,13 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         return NGX_ERROR;
     }
 
-    L = ctx->cur_co_ctx->co;
+    coctx = ctx->cur_co_ctx;
+    if (coctx == NULL) {
+        ngx_log_error(NGX_LOG_ERR, c->log, 0, "no co ctx found");
+        return  NGX_ERROR;
+    }
+
+    L = coctx->co;
 
     bytes = (ngx_int_t) luaL_checknumber(L, 1);
 
