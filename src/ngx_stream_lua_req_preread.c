@@ -215,7 +215,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         return NGX_ERROR;
     }
 
-    coctx = ctx->preread_coctx;
+    coctx = ctx->preread_co_ctx;
 
     if (coctx == NULL) {
         ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
