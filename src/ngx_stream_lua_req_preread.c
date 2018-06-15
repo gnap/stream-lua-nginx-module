@@ -95,10 +95,7 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
     ngx_connection_t                *c;
     size_t                           size;
     ssize_t                          n;
-    ngx_stream_lua_ctx_t            *ctx;
-    ngx_stream_lua_co_ctx_t         *coctx;
     ngx_stream_core_srv_conf_t      *cscf;
-    ngx_int_t                        bytes;
     off_t                            preread = 0;
 
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
@@ -106,18 +103,6 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
     cscf = ngx_stream_lua_get_module_srv_conf(r, ngx_stream_core_module);
 
     c = r->connection;
-
-    ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
-
-    if (ctx == NULL) {
-        return;
-    }
-
-    coctx = ctx->cur_co_ctx;
-    if (coctx == NULL) {
-        ngx_log_error(NGX_LOG_ERR, c->log, 0, "preread no co ctx to handle");
-        return;
-    }
 
     do {
 
@@ -173,14 +158,10 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 
     } while (n > 0);
 
-    L = coctx->co;
-
-    bytes = (ngx_int_t) luaL_checknumber(L, 1);
-
     preread = (size_t)ngx_buf_size(r->connection->buffer);
 
     ngx_log_debug2(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
-                   "preread buffer filed %d/%d", preread, bytes);
+                   "preread buffer filed %d", preread);
 
 }
 
@@ -222,6 +203,8 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
                 "req preread no co ctx to resume");
         return  NGX_ERROR;
     }
+
+    ngx_stream_lua_req_preread_handler(r);
 
     if (r->connection->buffer != NULL) {
         preread = (size_t)ngx_buf_size(r->connection->buffer);
