@@ -92,6 +92,7 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
     ssize_t                          n;
     ngx_stream_lua_ctx_t            *ctx;
     ngx_stream_core_srv_conf_t      *cscf;
+    ngx_int_t                        bytes;
     off_t                            preread = 0;
 
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
@@ -105,6 +106,10 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
     if (ctx == NULL) {
         return;
     }
+
+    L = ctx->cur_co_ctx->co;
+
+    bytes = (ngx_int_t) luaL_checknumber(L, 1);
 
     do {
 
