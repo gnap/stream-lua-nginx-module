@@ -93,6 +93,7 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
     ngx_int_t                        rc = NGX_OK;
     ngx_stream_lua_ctx_t            *ctx;
     ngx_stream_core_srv_conf_t      *cscf;
+    off_t                            preread = 0;
 
     cscf = ngx_stream_lua_get_module_srv_conf(r, ngx_stream_core_module);
 
@@ -158,6 +159,10 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 
     } while (n > 0);
 
+    preread = (size_t)ngx_buf_size(r->connection->buffer);
+    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                   "preread buffer filed %d", preread);
+
     if (ctx->entered_preread_phase) {
         (void) ngx_stream_lua_req_preread_resume(r);
 
@@ -189,6 +194,9 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     ngx_int_t                            bytes;
     off_t                                preread = 0;
     luaL_Buffer luabuf;
+
+    ngx_log_debug0(NGX_LOG_DEBUG_STREAM, s->connection->log, 0,
+                   "req preread resume");
 
     ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
     if (ctx == NULL) {
