@@ -71,6 +71,7 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
                    r->connection->read->active,
                    r->connection->read->ready);
 
+    ctx->resume_handler = ngx_stream_lua_req_preread_resume;
     r->read_event_handler = ngx_stream_lua_req_preread_handler;
     r->read_event_handler(r);
 
@@ -170,14 +171,6 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 
     ngx_log_debug2(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "preread buffer filed %d/%d", preread, bytes);
-
-    if (ctx->entered_preread_phase) {
-        (void) ngx_stream_lua_req_preread_resume(r);
-
-    } else {
-        ctx->resume_handler = ngx_stream_lua_req_preread_resume;
-        ngx_stream_lua_core_run_phases(r);
-    }
 
 }
 
