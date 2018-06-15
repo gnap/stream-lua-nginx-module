@@ -65,6 +65,7 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     ngx_stream_lua_cleanup_pending_operation(coctx);
     coctx->cleanup = ngx_stream_lua_req_preread_cleanup;
     coctx->data = r;
+    ctx->preread_co_ctx = coctx;
 
     ngx_log_debug2(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "r->connection->read->active: %d ready: %d",
@@ -74,6 +75,8 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     ctx->resume_handler = ngx_stream_lua_req_preread_resume;
     r->read_event_handler = ngx_stream_lua_req_preread_handler;
     r->read_event_handler(r);
+
+
 
     return lua_yield(L, 0);
 }
@@ -211,7 +214,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         return NGX_ERROR;
     }
 
-    coctx = ctx->cur_co_ctx;
+    coctx = ctx->preread_cotxt;
     if (coctx == NULL) {
         ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                 "req preread no co ctx to resume");
@@ -240,6 +243,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         luaL_pushresult(&luabuf);
 
         ctx->resume_handler = ngx_stream_lua_wev_handler;
+        ctx->cur_co_ctx = coctx;
 
         c = r->connection;
         vm = ngx_stream_lua_get_lua_vm(r, ctx);

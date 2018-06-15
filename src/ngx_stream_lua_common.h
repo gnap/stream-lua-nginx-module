@@ -388,6 +388,8 @@ typedef struct ngx_stream_lua_ctx_s {
     ngx_stream_lua_co_ctx_t   *on_abort_co_ctx; /* coroutine context for the
                                                  on_abort thread */
 
+    ngx_stream_lua_co_ctx_t   *preread_co_ctx; /* coroutine context for preread */
+
     int                      ctx_ref;  /*  reference to anchor
                                            request ctx data in lua
                                            registry */
