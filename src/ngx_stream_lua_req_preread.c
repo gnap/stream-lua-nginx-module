@@ -223,16 +223,16 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         return  NGX_ERROR;
     }
 
-    L = coctx->co;
-
-    bytes = (ngx_int_t) luaL_checknumber(L, 1);
-
     if (r->connection->buffer != NULL) {
         preread = (size_t)ngx_buf_size(r->connection->buffer);
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
-                   "preread buffer filed %d/%d", preread, bytes);
+    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                   "preread buffer filed %d", preread);
+
+    L = coctx->co;
+
+    bytes = (ngx_int_t) luaL_checknumber(L, 1);
 
     if (preread >= (off_t)bytes) {
 
