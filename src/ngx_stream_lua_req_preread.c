@@ -213,7 +213,8 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
 
     coctx = ctx->cur_co_ctx;
     if (coctx == NULL) {
-        ngx_log_error(NGX_LOG_ERR, c->log, 0, "no co ctx found");
+        ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                "req preread no co ctx to resume");
         return  NGX_ERROR;
     }
 
