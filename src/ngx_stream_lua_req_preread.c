@@ -203,7 +203,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     ngx_uint_t                           nreqs;
     ngx_stream_lua_ctx_t                *ctx;
     ngx_stream_lua_co_ctx_t             *coctx;
-    ngx_int_t                            bytes;
+    // ngx_int_t                            bytes;
     off_t                                preread = 0;
     luaL_Buffer luabuf;
 
@@ -232,9 +232,10 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
 
     L = coctx->co;
 
-    bytes = (ngx_int_t) luaL_checknumber(L, 1);
+    // bytes = (ngx_int_t) luaL_checknumber(L, 1);
 
-    if (preread >= (off_t)bytes) {
+    // if (preread >= (off_t)bytes) {
+    if (preread >= 5) {
 
         ngx_stream_lua_probe_req_peak_preread(r,
                 r->connection->buffer->pos,
