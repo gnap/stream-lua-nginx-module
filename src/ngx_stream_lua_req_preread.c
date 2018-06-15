@@ -184,7 +184,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     ngx_uint_t                           nreqs;
     ngx_stream_lua_ctx_t                *ctx;
     ngx_stream_lua_co_ctx_t             *coctx;
-    // ngx_int_t                            bytes;
+    ngx_int_t                            bytes = 5;
     off_t                                preread = 0;
     luaL_Buffer luabuf;
 
@@ -217,15 +217,14 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
 
     // bytes = (ngx_int_t) luaL_checknumber(L, 1);
 
-    // if (preread >= (off_t)bytes) {
-    if (preread >= 5) {
+    if (preread >= (off_t)bytes) {
 
         ngx_stream_lua_probe_req_peak_preread(r,
                 r->connection->buffer->pos,
                 preread);
 
         luaL_buffinit(L, &luabuf);
-        luaL_addlstring(&luabuf, (char *) r->connection->buffer->pos, preread);
+        luaL_addlstring(&luabuf, (char *) r->connection->buffer->pos, bytes);
         luaL_pushresult(&luabuf);
 
         ctx->resume_handler = ngx_stream_lua_wev_handler;
