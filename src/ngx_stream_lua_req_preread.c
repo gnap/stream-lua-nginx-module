@@ -32,7 +32,6 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
 
     ngx_stream_lua_ctx_t        *ctx;
     ngx_stream_lua_co_ctx_t     *coctx;
-    off_t                                preread = 0;
 
     n = lua_gettop(L);
     if (n != 1) {
