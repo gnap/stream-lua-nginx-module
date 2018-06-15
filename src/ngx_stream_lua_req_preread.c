@@ -87,6 +87,7 @@ ngx_stream_lua_inject_req_preread_api(lua_State *L)
 void
 ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 {
+    lua_State                       *L;
     ngx_connection_t                *c;
     size_t                           size;
     ssize_t                          n;
