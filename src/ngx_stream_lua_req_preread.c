@@ -90,7 +90,6 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
     ngx_connection_t                *c;
     size_t                           size;
     ssize_t                          n;
-    ngx_int_t                        rc = NGX_OK;
     ngx_stream_lua_ctx_t            *ctx;
     ngx_stream_core_srv_conf_t      *cscf;
     off_t                            preread = 0;
@@ -112,7 +111,7 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
             if (c->buffer == NULL) {
                 // TODO handle error
                 ngx_log_error(NGX_LOG_ERR, c->log, 0, "preread buffer alloc failed.");
-                rc = NGX_ERROR;
+                //rc = NGX_ERROR;
                 break;
             }
         }
@@ -121,18 +120,18 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 
         if (size == 0) {
             ngx_log_error(NGX_LOG_ERR, c->log, 0, "preread buffer full");
-            rc = NGX_STREAM_BAD_REQUEST;
+            //rc = NGX_STREAM_BAD_REQUEST;
             break;
         }
 
         if (c->read->eof) {
-            rc = NGX_STREAM_OK;
+            //rc = NGX_STREAM_OK;
             break;
         }
 
         if (!c->read->ready) {
             if (ngx_handle_read_event(c->read, 0) != NGX_OK) {
-                rc = NGX_ERROR;
+               // rc = NGX_ERROR;
                 break;
             }
 
@@ -142,14 +141,14 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 
             c->read->handler = ngx_stream_session_handler;
 
-            rc = NGX_AGAIN;
+           // rc = NGX_AGAIN;
             break;
         }
 
         n = c->recv(c, c->buffer->last, size);
 
         if (n == NGX_ERROR) {
-            rc = NGX_STREAM_OK;
+           // rc = NGX_STREAM_OK;
             break;
         }
 
@@ -195,7 +194,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     off_t                                preread = 0;
     luaL_Buffer luabuf;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_STREAM, s->connection->log, 0,
+    ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "req preread resume");
 
     ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
