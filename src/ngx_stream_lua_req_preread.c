@@ -94,6 +94,8 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
     ngx_stream_core_srv_conf_t      *cscf;
     off_t                            preread = 0;
 
+    ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                   "req preread handler");
     cscf = ngx_stream_lua_get_module_srv_conf(r, ngx_stream_core_module);
 
     c = r->connection;
