@@ -119,7 +119,6 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         preread = (size_t)ngx_buf_size(r->connection->buffer);
     }
 
-    preread = (size_t)ngx_buf_size(r->connection->buffer);
     ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "preread buffer filed %d", preread);
 
