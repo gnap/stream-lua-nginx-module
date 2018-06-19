@@ -198,6 +198,7 @@ $ssl_preread_server_name = my.sni.server.name while prereading client data
 [warn]
 
 
+
 === TEST 33: prereading
 --- stream_server_config
     preread_by_lua_block {
@@ -216,6 +217,7 @@ preread buf = hello
 [crit]
 [warn]
 --- timeout: 10
+
 
 
 === TEST 39: Lua file does not exist
