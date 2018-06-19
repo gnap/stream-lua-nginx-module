@@ -205,7 +205,7 @@ $ssl_preread_server_name = my.sni.server.name while prereading client data
         ngx.log(ngx.INFO, "preread buf = " .. buf)
     }
 
-    content_by_lua return done;
+    return done;
 --- stream_request
 hello world
 --- stream_response chop
