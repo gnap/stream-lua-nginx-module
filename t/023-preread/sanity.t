@@ -7,7 +7,7 @@ use Test::Nginx::Socket::Lua::Stream;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 2 + 4);
+plan tests => repeat_each() * (blocks() * 2 + 6);
 
 #no_diff();
 #no_long_string();
@@ -159,27 +159,6 @@ Hi
 
 
 
-=== TEST 33: prereading
---- stream_server_config
-    preread_by_lua_block {
-        local buf = ngx.req.preread(5)
-        ngx.log(ngx.INFO, "preread buf = " .. buf)
-    }
-
-    return done;
---- stream_request
-hello world
---- stream_response chop
-done
---- error_log
-preread buf = hello
---- no_error_log
-[crit]
-[warn]
---- timeout: 0.5
-
-
-
 === TEST 32: phase postponing works
 --- stream_server_config
     ssl_preread on;
@@ -214,6 +193,26 @@ done
 --- error_log
 $ssl_preread_server_name =  while prereading client data
 $ssl_preread_server_name = my.sni.server.name while prereading client data
+--- no_error_log
+[crit]
+[warn]
+
+
+
+=== TEST 33: prereading
+--- stream_server_config
+    preread_by_lua_block {
+        local buf = ngx.req.preread(5)
+        ngx.log(ngx.INFO, "preread buf = " .. buf)
+    }
+
+    return done;
+--- stream_request
+hello world
+--- stream_response chop
+done
+--- error_log
+preread buf = hello
 --- no_error_log
 [crit]
 [warn]
