@@ -202,7 +202,7 @@ $ssl_preread_server_name = my.sni.server.name while prereading client data
 === TEST 33: prereading
 --- stream_server_config
     preread_by_lua_block {
-        local buf = ngx.req.preread(5)
+        local buf = ngx.req.preread(7)
         ngx.log(ngx.INFO, "preread buf = " .. buf)
     }
 
@@ -212,7 +212,7 @@ hello world
 --- stream_response chop
 done
 --- error_log
-preread buf = hello
+preread buf = hello w
 --- no_error_log
 [crit]
 [warn]
