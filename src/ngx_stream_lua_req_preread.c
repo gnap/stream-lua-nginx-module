@@ -19,7 +19,8 @@
 
 
 static int ngx_stream_lua_ngx_req_preread(lua_State *L);
-static ngx_int_t ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r);
+static void ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r);
+static ngx_int_t ngx_stream_lua_req_preread_io(ngx_stream_lua_request_t *r);
 static void ngx_stream_lua_req_preread_cleanup(void *data);
 static ngx_int_t ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r);
 
@@ -88,8 +89,14 @@ ngx_stream_lua_inject_req_preread_api(lua_State *L)
     lua_setfield(L, -2, "preread");
 }
 
-ngx_int_t
+void
 ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
+{
+    ngx_stream_lua_req_preread_io(r);
+}
+
+ngx_int_t
+ngx_stream_lua_req_preread_io(ngx_stream_lua_request_t *r)
 {
     ngx_connection_t                *c;
     size_t                           size;
@@ -208,7 +215,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         return  NGX_ERROR;
     }
 
-    rc = ngx_stream_lua_req_preread_handler(r);
+    rc = ngx_stream_lua_req_preread_io(r);
 
     if (rc == NGX_OK) {
 
