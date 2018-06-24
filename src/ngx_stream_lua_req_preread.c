@@ -101,7 +101,7 @@ ngx_stream_lua_req_preread_io(ngx_stream_lua_request_t *r)
     ngx_connection_t                *c;
     size_t                           size;
     ssize_t                          n;
-    ngx_int_t                        rc = NGX_AGAIN;
+    ngx_int_t                        rc = NGX_OK;
     ngx_stream_core_srv_conf_t      *cscf;
     off_t                            preread = 0;
 
