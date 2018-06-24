@@ -19,7 +19,7 @@
 
 
 static int ngx_stream_lua_ngx_req_preread(lua_State *L);
-static void ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r);
+static ngx_int_t ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r);
 static void ngx_stream_lua_req_preread_cleanup(void *data);
 static ngx_int_t ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r);
 
@@ -88,12 +88,13 @@ ngx_stream_lua_inject_req_preread_api(lua_State *L)
     lua_setfield(L, -2, "preread");
 }
 
-void
+ngx_int_t
 ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 {
     ngx_connection_t                *c;
     size_t                           size;
     ssize_t                          n;
+    ngx_int_t                        rc;
     ngx_stream_core_srv_conf_t      *cscf;
     off_t                            preread = 0;
 
@@ -110,7 +111,7 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
             if (c->buffer == NULL) {
                 // TODO handle error
                 ngx_log_error(NGX_LOG_ERR, c->log, 0, "preread buffer alloc failed.");
-                //rc = NGX_ERROR;
+                rc = NGX_ERROR;
                 break;
             }
         }
@@ -119,18 +120,18 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 
         if (size == 0) {
             ngx_log_error(NGX_LOG_ERR, c->log, 0, "preread buffer full");
-            //rc = NGX_STREAM_BAD_REQUEST;
+            rc = NGX_STREAM_BAD_REQUEST;
             break;
         }
 
         if (c->read->eof) {
-            //rc = NGX_STREAM_OK;
+            rc = NGX_STREAM_OK;
             break;
         }
 
         if (!c->read->ready) {
             if (ngx_handle_read_event(c->read, 0) != NGX_OK) {
-               // rc = NGX_ERROR;
+                rc = NGX_ERROR;
                 break;
             }
 
@@ -140,14 +141,14 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 
             c->read->handler = ngx_stream_session_handler;
 
-           // rc = NGX_AGAIN;
+            rc = NGX_AGAIN;
             break;
         }
 
         n = c->recv(c, c->buffer->last, size);
 
         if (n == NGX_ERROR) {
-           // rc = NGX_STREAM_OK;
+            rc = NGX_STREAM_OK;
             break;
         }
 
@@ -159,8 +160,12 @@ ngx_stream_lua_req_preread_handler(ngx_stream_lua_request_t *r)
 
     preread = (size_t)ngx_buf_size(r->connection->buffer);
 
+    ngx_stream_lua_probe_req_peak_preread(r,
+            r->connection->buffer->pos,
+            preread);
     ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "preread buffer filed %d", preread);
+    return rc;
 
 }
 
@@ -183,7 +188,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     ngx_uint_t                           nreqs;
     ngx_stream_lua_ctx_t                *ctx;
     ngx_stream_lua_co_ctx_t             *coctx;
-    ngx_int_t                            bytes = 5;
+    ngx_int_t                            bytes = 0;
     off_t                                preread = 0;
     luaL_Buffer luabuf;
 
@@ -203,25 +208,12 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         return  NGX_ERROR;
     }
 
-    ngx_stream_lua_req_preread_handler(r);
+    rc = ngx_stream_lua_req_preread_handler(r);
 
-    if (r->connection->buffer != NULL) {
-        preread = (size_t)ngx_buf_size(r->connection->buffer);
-    }
+    if (rc == NGX_OK) {
 
-    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
-                   "preread buffer filed %d", preread);
-
-    L = coctx->co;
-
-    // bytes = (ngx_int_t) luaL_checknumber(L, 1);
-
-    if (preread >= (off_t)bytes) {
-
-        ngx_stream_lua_probe_req_peak_preread(r,
-                r->connection->buffer->pos,
-                preread);
-
+        bytes = ngx_buf_size(r->connection->buffer);
+        L = coctx->co;
         luaL_buffinit(L, &luabuf);
         luaL_addlstring(&luabuf, (char *) r->connection->buffer->pos, bytes);
         luaL_pushresult(&luabuf);
@@ -250,7 +242,11 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
         return rc;
     } 
 
-    return NGX_DONE;
+    if (rc == NGX_AGAIN) {
+        return NGX_DONE;
+    }
+
+    return rc;
 }
 
 /* vi:set ft=c ts=4 sw=4 et fdm=marker: */
