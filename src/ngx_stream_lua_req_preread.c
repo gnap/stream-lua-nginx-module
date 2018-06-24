@@ -112,6 +112,13 @@ ngx_stream_lua_req_preread_io(ngx_stream_lua_request_t *r)
 
     c = r->connection;
 
+    if (c->read->timedout) {
+        rc = NGX_STREAM_OK;
+
+    } else if (c->read->timer_set) {
+        rc = NGX_AGAIN;
+    }
+
     do {
 
         if (c->buffer == NULL) {
@@ -178,7 +185,6 @@ ngx_stream_lua_req_preread_io(ngx_stream_lua_request_t *r)
         rc = NGX_OK;
     }
     return rc;
-
 }
 
 
