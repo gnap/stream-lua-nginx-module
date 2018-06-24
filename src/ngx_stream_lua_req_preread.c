@@ -101,9 +101,10 @@ ngx_stream_lua_req_preread_io(ngx_stream_lua_request_t *r)
     ngx_connection_t                *c;
     size_t                           size;
     ssize_t                          n;
-    ngx_int_t                        rc = NGX_OK;
+    ngx_int_t                        rc;
     ngx_stream_core_srv_conf_t      *cscf;
     off_t                            preread = 0;
+    ngx_int_t                        bytes = 5;
 
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "req preread handler");
@@ -114,7 +115,7 @@ ngx_stream_lua_req_preread_io(ngx_stream_lua_request_t *r)
     do {
 
         if (c->buffer == NULL) {
-            c->buffer = ngx_create_temp_buf(c->pool, cscf->preread_buffer_size);
+            c->buffer = ngx_create_temp_buf(c->pool, min(cscf->preread_buffer_size, bytes));
             if (c->buffer == NULL) {
                 // TODO handle error
                 ngx_log_error(NGX_LOG_ERR, c->log, 0, "preread buffer alloc failed.");
@@ -172,6 +173,10 @@ ngx_stream_lua_req_preread_io(ngx_stream_lua_request_t *r)
             preread);
     ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "preread buffer filed %d", preread);
+
+    if (preread >= bytes) {
+        rc = NGX_OK;
+    }
     return rc;
 
 }
@@ -195,7 +200,7 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     ngx_uint_t                           nreqs;
     ngx_stream_lua_ctx_t                *ctx;
     ngx_stream_lua_co_ctx_t             *coctx;
-    ngx_int_t                            bytes = 0;
+    ngx_int_t                            bytes;
     luaL_Buffer luabuf;
 
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
