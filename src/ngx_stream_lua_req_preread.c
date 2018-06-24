@@ -196,7 +196,6 @@ ngx_stream_lua_req_preread_resume(ngx_stream_lua_request_t *r)
     ngx_stream_lua_ctx_t                *ctx;
     ngx_stream_lua_co_ctx_t             *coctx;
     ngx_int_t                            bytes = 0;
-    off_t                                preread = 0;
     luaL_Buffer luabuf;
 
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
