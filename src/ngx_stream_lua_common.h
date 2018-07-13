@@ -390,6 +390,8 @@ typedef struct ngx_stream_lua_ctx_s {
 
     ngx_stream_lua_co_ctx_t   *preread_co_ctx; /* coroutine context for preread */
 
+    ngx_int_t                  preread_bytes;  /* bytes to preread */
+
     int                      ctx_ref;  /*  reference to anchor
                                            request ctx data in lua
                                            registry */

@@ -67,6 +67,7 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
     coctx->cleanup = ngx_stream_lua_req_preread_cleanup;
     coctx->data = r;
     ctx->preread_co_ctx = coctx;
+    ctx->preread_bytes = bytes;
 
     ngx_log_debug2(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "r->connection->read->active: %d ready: %d",
@@ -103,14 +104,23 @@ ngx_stream_lua_req_preread_io(ngx_stream_lua_request_t *r)
     ssize_t                          n;
     ngx_int_t                        rc = NGX_ERROR;
     ngx_stream_core_srv_conf_t      *cscf;
+    ngx_stream_lua_ctx_t        *ctx;
     off_t                            preread = 0;
-    ngx_int_t                        bytes = 5;
+    ngx_int_t                        bytes;
 
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
                    "req preread handler");
     cscf = ngx_stream_lua_get_module_srv_conf(r, ngx_stream_core_module);
 
     c = r->connection;
+    
+
+    ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
+    if (ctx == NULL) {
+        return NGX_ERROR;
+    }
+
+    bytes = ctx->preread_bytes; 
 
     if (c->read->timedout) {
         rc = NGX_STREAM_OK;
