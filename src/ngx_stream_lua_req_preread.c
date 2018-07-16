@@ -34,6 +34,7 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
 
     ngx_stream_lua_ctx_t        *ctx;
     ngx_stream_lua_co_ctx_t     *coctx;
+    luaL_Buffer luabuf;
 
     n = lua_gettop(L);
     if (n != 1) {
@@ -56,6 +57,13 @@ ngx_stream_lua_ngx_req_preread(lua_State *L)
 
     if (bytes < 0) {
         return luaL_error(L, "invalid preread bytes \"%d\"", bytes);
+    }
+
+    if (r->connection->buffer != NULL && ngx_buf_size(r->connection->buffer) >= bytes) {
+        luaL_buffinit(L, &luabuf);
+        luaL_addlstring(&luabuf, (char *) r->connection->buffer->pos, bytes);
+        luaL_pushresult(&luabuf);
+        return 1;
     }
 
     coctx = ctx->cur_co_ctx;
