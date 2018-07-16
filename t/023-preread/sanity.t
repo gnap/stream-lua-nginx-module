@@ -7,7 +7,7 @@ use Test::Nginx::Socket::Lua::Stream;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 2 + 7);
+plan tests => repeat_each() * (blocks() * 2 + 10);
 
 #no_diff();
 #no_long_string();
@@ -218,6 +218,29 @@ preread buf = hello w
 [warn]
 
 
+=== TEST 34: socket read after prereading
+--- stream_server_config
+
+    preread_by_lua_block {
+        local buf = ngx.req.preread(7)
+    }
+
+    content_by_lua_block {
+        local sock = ngx.req.socket(true)
+        local data, _, _ = sock:receive(12)
+        ngx.log(ngx.INFO, "received = " .. data)
+        sock:send("done")
+        sock:shutdown("send")
+    }
+--- stream_request
+hello world
+--- stream_response chop
+done
+--- error_log
+received = hello world
+--- no_error_log
+[crit]
+[warn]
 
 === TEST 39: Lua file does not exist
 --- stream_server_config
