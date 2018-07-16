@@ -315,8 +315,7 @@ ngx_stream_lua_set_write_handler(ngx_stream_lua_request_t *r)
     ngx_stream_lua_srv_conf_t   *lscf;
 
     r->read_event_handler = ngx_stream_lua_request_empty_handler;
-    r->write_event_handler = ngx_stream_lua_writer;
-
+    r->write_event_handler = ngx_stream_lua_writer; 
     wev = r->connection->write;
 
     if (wev->ready && wev->delayed) {

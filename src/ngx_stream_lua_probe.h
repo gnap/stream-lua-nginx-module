@@ -27,6 +27,9 @@
 #define ngx_stream_lua_probe_req_socket_consume_preread(r, data, len)        \
     NGINX_LUA_HTTP_LUA_REQ_SOCKET_CONSUME_PREREAD(r, data, len)
 
+#define ngx_stream_lua_probe_req_peak_preread(r, data, len)        \
+NGINX_LUA_HTTP_LUA_REQ_PEAK_PREREAD(r, data, len)
+
 #define ngx_stream_lua_probe_user_coroutine_create(r, parent, child)         \
     NGINX_LUA_HTTP_LUA_USER_COROUTINE_CREATE(r, parent, child)
 
@@ -70,6 +73,7 @@
 #define ngx_stream_lua_probe_info(s)
 #define ngx_stream_lua_probe_register_preload_package(L, pkg)
 #define ngx_stream_lua_probe_req_socket_consume_preread(r, data, len)
+#define ngx_stream_lua_probe_req_peak_preread(r, data, len)
 #define ngx_stream_lua_probe_user_coroutine_create(r, parent, child)
 #define ngx_stream_lua_probe_user_coroutine_resume(r, parent, child)
 #define ngx_stream_lua_probe_user_coroutine_yield(r, parent, child)

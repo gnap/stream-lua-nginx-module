@@ -88,6 +88,8 @@ ngx_stream_lua_preread_handler(ngx_stream_session_t *s)
     dd("entered? %d", (int) ctx->entered_preread_phase);
 
     if (ctx->entered_preread_phase) {
+        ngx_log_debug0(NGX_LOG_DEBUG_STREAM, s->connection->log, 0,
+                "calling resume handler");
         dd("calling wev handler");
         rc = ctx->resume_handler(r);
         dd("wev handler returns %d", (int) rc);

@@ -322,6 +322,7 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
                 $ngx_addon_dir/src/ngx_stream_lua_string.c \
                 $ngx_addon_dir/src/ngx_stream_lua_control.c \
                 $ngx_addon_dir/src/ngx_stream_lua_sleep.c \
+                $ngx_addon_dir/src/ngx_stream_lua_req_preread.c \
                 $ngx_addon_dir/src/ngx_stream_lua_phase.c \
                 $ngx_addon_dir/src/ngx_stream_lua_ctx.c \
                 $ngx_addon_dir/src/ngx_stream_lua_regex.c \
@@ -364,6 +365,7 @@ NGX_ADDON_DEPS="$NGX_ADDON_DEPS \
                 $ngx_addon_dir/src/ngx_stream_lua_string.h \
                 $ngx_addon_dir/src/ngx_stream_lua_control.h \
                 $ngx_addon_dir/src/ngx_stream_lua_sleep.h \
+                $ngx_addon_dir/src/ngx_stream_lua_req_preread.h \
                 $ngx_addon_dir/src/ngx_stream_lua_phase.h \
                 $ngx_addon_dir/src/ngx_stream_lua_ctx.h \
                 $ngx_addon_dir/src/ngx_stream_lua_regex.h \

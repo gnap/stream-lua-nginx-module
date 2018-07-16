@@ -7,7 +7,7 @@ use Test::Nginx::Socket::Lua::Stream;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 2 + 4);
+plan tests => repeat_each() * (blocks() * 2 + 13);
 
 #no_diff();
 #no_long_string();
@@ -193,6 +193,72 @@ done
 --- error_log
 $ssl_preread_server_name =  while prereading client data
 $ssl_preread_server_name = my.sni.server.name while prereading client data
+--- no_error_log
+[crit]
+[warn]
+
+
+
+=== TEST 33: prereading
+--- stream_server_config
+    preread_by_lua_block {
+        local buf = ngx.req.preread(7)
+        ngx.log(ngx.INFO, "preread buf = " .. buf)
+    }
+
+    return done;
+--- stream_request
+hello world
+--- stream_response chop
+done
+--- error_log
+preread buf = hello w
+--- no_error_log
+[crit]
+[warn]
+
+
+=== TEST 34: socket read after prereading
+--- stream_server_config
+
+    preread_by_lua_block {
+        local buf = ngx.req.preread(7)
+    }
+
+    content_by_lua_block {
+        local sock = ngx.req.socket(true)
+        local data, _, _ = sock:receive(12)
+        ngx.log(ngx.INFO, "received = " .. data)
+        sock:send("done")
+        sock:shutdown("send")
+    }
+--- stream_request
+hello world
+--- stream_response chop
+done
+--- error_log
+received = hello world
+--- no_error_log
+[crit]
+[warn]
+
+
+
+=== TEST 35: double prereading
+--- stream_server_config
+    preread_by_lua_block {
+        local _ = ngx.req.preread(5)
+        local buf = ngx.req.preread(10)
+        ngx.log(ngx.INFO, "preread buf = " .. buf)
+    }
+
+    return done;
+--- stream_request
+hello world
+--- stream_response chop
+done
+--- error_log
+preread buf = hello worl
 --- no_error_log
 [crit]
 [warn]

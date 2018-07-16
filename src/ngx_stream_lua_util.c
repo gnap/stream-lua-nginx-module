@@ -31,6 +31,7 @@
 #include "ngx_stream_lua_socket_tcp.h"
 #include "ngx_stream_lua_socket_udp.h"
 #include "ngx_stream_lua_sleep.h"
+#include "ngx_stream_lua_req_preread.h"
 #include "ngx_stream_lua_phase.h"
 #include "ngx_stream_lua_probe.h"
 #include "ngx_stream_lua_uthread.h"
@@ -496,7 +497,6 @@ ngx_stream_lua_inject_ngx_api(lua_State *L, ngx_stream_lua_main_conf_t *lmcf,
 #endif
 
     ngx_stream_lua_inject_req_api(log, L);
-
 
     ngx_stream_lua_inject_variable_api(L);
     ngx_stream_lua_inject_shdict_api(lmcf, L);
@@ -1863,11 +1863,11 @@ ngx_stream_lua_inject_req_api(ngx_log_t *log, lua_State *L)
 {
     /* ngx.req table */
 
-    lua_createtable(L, 0 /* narr */, 24 /* nrec */);    /* .req */
+    lua_createtable(L, 0 /* narr */, 25 /* nrec */);    /* .req */
 
     lua_pushcfunction(L, ngx_stream_lua_req_socket);
     lua_setfield(L, -2, "socket");
-
+    ngx_stream_lua_inject_req_preread_api(L);
 
     lua_setfield(L, -2, "req");
 }
